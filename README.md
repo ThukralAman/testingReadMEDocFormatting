@@ -1,11 +1,11 @@
-#References:
+# References:
 -  JakeVide0 2018 JSCONF(little complicated): https://www.youtube.com/watch?v=cCOL7MC4Pl0
     +  His article with animated examples for promise(microtask queues understanding): https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
 - Philip Roberts: What the heck is the event loop anyway (All content is picked from this video mostly): What the heck is the event loop anyway
 
 
 
-#1) What is javascript
+# 1) What is javascript
 - Its a
     + Single threaded
     + Non-blocking
@@ -20,23 +20,23 @@ language
     + some other apis
     
 
-#2) What is V8?
+# 2) What is V8?
 - As of now 5/5/2018, its JS runtime environment for Chrome
 ![](event_loop/event_loop0.png)
 ![](event_loop/event_loop1.png)
 
-#3) Is javascript single threaded
+# 3) Is javascript single threaded
 Yes, see image how it runs in a single thread:
 ![](event_loop/event_loop2.png)
 ![](event_loop/event_loop3.png)
 
-#4) What are blocking instructions
+# 4) What are blocking instructions
 Anything which is relatively slow is blocking. We don't have a hard definition of slow here. Some examples
 - console.log() -> NON-BLOCKING
 - n/w request -> BLOCKING
 - while loop 1-1000000000 is BLOCKING
 
-#5) What would have happend if Javascript was blocking(no async) ?
+# 5) What would have happend if Javascript was blocking(no async) ?
 Conside image ![](event_loop/event_loop4.png),
 First n/w req $.getSync('//foo.com') will move on stack and then finish execution and pop out of stack
 
@@ -44,14 +44,14 @@ Then again second n/w req will be added to stack and so on
 
 So problem here is that while the n/w request is being processed on stack, browser UI will be freezed as other js related to UI(like button will be freezed) will be blocked.
 
-#6) How does javascript deal with blocking n/w requsets on a single thread stack ?
+# 6) How does javascript deal with blocking n/w requsets on a single thread stack ?
 - using asynchronous callbacks
 - See: ![](event_loop/event_loop5.png) . The setTimeout function has a callback defined which is called after 5 seconds.
 - So first console.log("Hi") is pushed and processed(popped out). Then timeout function call is placed on stack. But while it is waiting this call popped from execution stack and is pushed on to callback queue(will discuss this later). 
 - Then console.log("JsconfEU") is pushed on stack and processed(popped out of stack)
 - Then event loop(will discuss later) pushes the timeout function call from callback queue on top of execution stack and processes it.
 
-#7) How does concurrency actually happen in browser with blocking n/w requests
+# 7) How does concurrency actually happen in browser with blocking n/w requests
 - See image: ![](event_loop/event_loop6.png)
 - Chrome has a JS runtime environment shown as stack and heap
 - At the same time there is a WEB-API section which handles DOM, AJAX requests and setTimeout function calls.
@@ -81,13 +81,13 @@ console.log("JSConfEU");
 Your XHR/Network request also works in the same way in chrome: [![](event_loop/event_loop13.png)]
 
 
-#8) If setTimeout(callbackFunction, 8000) is called 4 times then,  will the 4th timeout command execute exactly after 36000ms ?
+# 8) If setTimeout(callbackFunction, 8000) is called 4 times then,  will the 4th timeout command execute exactly after 36000ms ?
 - No the value provided in timeout is NOT the exact time to execution. It is the minimum amount after which the callback will be processed.
 - Thats because say, when 4th timeout goes into task queue and at that time two previous timeouts are already waiting ahead of 4th timeout.
 - S0 although 4th timeout was placed on event queue on time i.e after 36000ms, there might be an additional delay due to task queue having additional commands to process . See: [![](event_loop/event_loop14.png)]  
 
 
-#9) What are callbacks ?
+# 9) What are callbacks ?
 - Callback is generally a function that another function calls
 OR
 - Callback can be an asynchronous callback which will be pushed on to the task queue
@@ -117,7 +117,7 @@ asyncForEach( [1,2,3,4], function() {
 ```
 
 
-#10) What is a render queue
+# 10) What is a render queue
 - Apart from task queue, there is a render queue which is responsible for painting the DOM on the screen. 
 - It has a higher priority for being processed than the task queue
 - Like task queue, it needs to move its paint job on the stack of execution to paint out the DOM updation
@@ -147,7 +147,7 @@ S2: function(2) .... and this goes on till 4
 - But all this time while stack was not empty, the render queue could not execute its job of painting and UI will look freezed for this duration
 - When stack is finally empty after the sync code executes, render queue pushes its paint job on stack of execution and repaints the DOM
 
-#12) how does async code helps unblock render queue
+# 12) how does async code helps unblock render queue
 - Consider code
 ```
 //Asynchronous
@@ -188,7 +188,7 @@ S4: setTimeout(callback, 2) is called for loop:2
 
 **So this is how async code does not block rendering of DOM**
 
-#13) Is there a seperate queue for promises ?
+# 13) Is there a seperate queue for promises ?
 - Yes I am not getting much deep into it right now
 - But yes there is a separate queue for microtasks(promises happen to be a microtask only)
 - microtask queue has precedence over task queue for execution
